@@ -2,13 +2,14 @@
 
 def prompt_number():
     # prompt user for the number
-    num_entered = int(input('\nEnter a positive number: '))
+    num_entered = int(input('Enter a positive number: '))
 
     # ensures value is positive before returning the value
     while num_entered < 0:
         print('Invalid entry. The number must be positive.')
         num_entered = int(input('Enter a positive number: '))
 
+    print("")
     return num_entered
 
 
@@ -18,7 +19,7 @@ def compute_sum(passed_list):
     for n in passed_list:
         total += n
 
-    print(f'\nThe sum is: {total}')
+    print(f'The sum is: {total}')
 
 
 def main():
