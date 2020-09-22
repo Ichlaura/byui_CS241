@@ -5,7 +5,7 @@ a blob or binary blob. The term usually refers to
 a closed-source kernel module loaded into the kernel of an
 open-source operating system, and is sometimes also applied to code
 running outside the kernel, such as system firmware images, microcode
-updates, or userland programs.
+updates, or userland programs. Blob BLOB Blobing
 A proprietary device driver is a closed-source device driver published
 only in binary code. In the context of free and
 open-source software, a closed-source device driver is referred to as
