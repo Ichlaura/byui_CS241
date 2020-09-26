@@ -1,4 +1,6 @@
 # Lewis Lockhart :: CS-241
+import unittest
+
 
 # prompts for and returns file name entered by user
 def prompt_for_file_name():
@@ -65,6 +67,7 @@ def output_average(rate_list):
     # outputs information to the user
     print(f'The average commercial rate is: {average_rate}')
     print('')
+    return average_rate
 
 
 def output_high(h_rate):
@@ -89,3 +92,12 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+class TestingOutputAverage(unittest.TestCase):
+    def test_average(self):
+        self.assertEqual(output_average([10, 20, 30]), 20)
+
+
+if __name__ == "__main__":
+    unittest.main()
