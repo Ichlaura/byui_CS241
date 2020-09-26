@@ -99,5 +99,5 @@ class TestingOutputAverage(unittest.TestCase):
         self.assertEqual(output_average([10, 20, 30]), 20)
 
 
-if __name__ == "__main__":
-    unittest.main()
+# if __name__ == "__main__":
+#     unittest.main()
