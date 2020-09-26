@@ -2,14 +2,15 @@
 import unittest
 
 
-# prompts for and returns file name entered by user
 def prompt_for_file_name():
+    """ Prompts for and returns file name entered by user. """
     file_name = input("Please enter the data file: ")
     print('')
     return file_name
 
 
 def process_data():
+    """ Opens the file, parses the file data and returns a dictionary of values. """
     # holds values to be returned
     data_stash = {
         "highest_rate_data": [],
@@ -52,6 +53,7 @@ def process_data():
 
 
 def output_average(rate_list):
+    """ Takes a list of values and calculates/returns the average. """
     # var list
     rate_count = 0
     rate_total = 0.0
@@ -71,6 +73,7 @@ def output_average(rate_list):
 
 
 def output_high(h_rate):
+    """ Takes the high rate data and formats it for output to the user. """
     print('The highest rate is:')
     # parses information into the required format
     print(f'{h_rate[2]} ({h_rate[0]}, {h_rate[3]}) - ${float(h_rate[6])}')
@@ -78,12 +81,14 @@ def output_high(h_rate):
 
 
 def output_low(l_rate):
+    """ Takes the low rate data and formats it for output to the user. """
     print('The lowest rate is:')
     # parses information into the required format
     print(f'{l_rate[2]} ({l_rate[0]}, {l_rate[3]}) - ${float(l_rate[6])}')
 
 
 def main():
+    """ Calls process_data, passes the results to other functions for output to the user. """
     data = process_data()
     output_average(data['comm_rates'])
     output_high(data["highest_rate_data"])
@@ -95,6 +100,7 @@ if __name__ == "__main__":
 
 
 class TestingOutputAverage(unittest.TestCase):
+    """ Unit test for the output_average function. """
     def test_average(self):
         self.assertEqual(output_average([10, 20, 30]), 20)
 
