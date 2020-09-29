@@ -1,0 +1,36 @@
+Your Name: E Lewis Lockhart
+
+1. Describe two benefits of using functions.
+--> Functions allow for clear organization of code
+--> Functions support reusability
+
+2. If you were getting paid to write this week's "prove" assignment, and could spend another 100 hours on it, what
+would you do differently?
+--> I would:
+-----> build a better CLI that allowed the user to get any of the data they needed
+-----> make the CLI visually appealing
+-----> add an option to create a file with the data they needed
+-----> make the program web-based via an API
+
+3. What is the most interesting thing you learned as a part of your work for this class this week?
+--> with open(prompt_for_file_name(), "r") as process_file:
+--> unittest.TestCase
+
+4. Describe one specific way that you helped someone else this week, or reached out for help.
+--> I answered a questions by Jash when he asked a question about the if __name__ == "__main__":
+    main() setup and placement in the file.
+
+5. Are there any topics from this week that you still feel uneasy about, or would like to learn more about?
+--> The content this week seemed pretty clear. I'm sure I will have questions later.
+
+6. How much time did you spend this week on each of the following:
+
+Reading - 2 hrs
+Checkpoint A - 1 hr
+Checkpoint B - 1 hr
+Team Activity - 3 hrs
+Data Structures Homework - 1 hr
+Prove Assignment - 4 hrs
+
+If you have other questions or comments for the instructor, please post them to Slack, either in the general channel
+if others can benefit, or as a direct message if the matter is more personal.
