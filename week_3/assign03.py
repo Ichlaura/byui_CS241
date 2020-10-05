@@ -188,6 +188,7 @@ def main():
                 lr.status()
             elif cmd == 'quit':
                 prompt = False
+                print('Goodbye.')
             elif cmd == 'charge':
                 lr.charge()
             elif cmd == 'evm':

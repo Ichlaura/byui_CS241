@@ -45,6 +45,7 @@ def main():
     c1.display()
     c2.display()
 
+
 # If this is the main program being run, call our main function above
 if __name__ == "__main__":
     main()
