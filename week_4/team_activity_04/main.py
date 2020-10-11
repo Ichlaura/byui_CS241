@@ -6,6 +6,7 @@ def main():
     a = Assignment()
     a.prompt()
     a.display()
+    print(a.start_date.display_long())
 
 
 if __name__ == "__main__":
