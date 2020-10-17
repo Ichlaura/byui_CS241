@@ -1,0 +1,3 @@
+{'value_1': 10, 'value_2': 20, 'value_3': 30}
+
+{'value_1': 10, 'value_2': 20, 'value_3': 30}
