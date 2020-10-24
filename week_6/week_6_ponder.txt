@@ -1,0 +1,30 @@
+Your Name: Lewis Lockhart
+
+1. Give a specific example of a time when you might want to override a method from a base class.
+--> One example of this could be a class created to read and output the text for a file. The child class
+--> might be created to read in another language file and then add a translation of the text.
+
+2. Do you think IS-A or HAS-A is a better choice for the team activity (Circles and Points)? Why?
+--> IS-A - this seems to require less coding but looking at the class,
+--> it is a little harder to see what is happening.
+--> HAS-A - this requires more code but the origin of the methods is far
+--> more clear. Allows for more than one instance of Point for example.
+
+3. What is the most interesting thing you learned as a part of your work for this class this week?
+--> Nothing really - it was good to get more practice with with classes and inheritance.
+
+4. Describe one specific way that you helped someone else this week, or reached out for help.
+--> I posted "Anyone have the skeet working? My rifle is pointing the wrong way"
+--> I ended up solving this myself. The starter code was wrong (someone with access to the repo should fix that).
+
+5. Are there any topics from this week that you still feel uneasy about, or would like to learn more about?
+--> It would have been nice to be prepared to build the entire skeet program, not just part of it.
+
+6. How much time did you spend this week on each of the following:
+
+Reading - 2 hr
+Checkpoint A - 2 hr
+Checkpoint B - 2 hr
+Team Activity - 1 hr
+Data Structures Homework - 3 hr
+Prove Assignment - 6 hr
