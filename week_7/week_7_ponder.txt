@@ -1,0 +1,32 @@
+Your Name: Lewis Lockhart
+
+1. Take a minute to search the Internet for an explanation of "polymorphism". You might especially consider
+sources such as StackOverflow and Wikipedia. After reading through some of these, in your own words, describe
+polymorphism AND why it's useful.
+--> Polymorphism is the idea that something can take different forms. In programming, this appears when an object
+--> can have several differing implementations - each one adapted to handle a task in a specific way. This seems
+--> to be one of the main ideas in OOP. It is useful because it allows reusable bits of code to be altered to adapt
+--> to the required functionality.
+
+2. What is the benefit of making an empty abstract method in a base class?
+--> It causes any classed based on that parent to implement a unique version of the method.
+
+3. What is the most interesting thing you learned as a part of your work for this class this week?
+--> I think it was the use of the abstract base classes. I think this is good insights into 'real' programming.
+
+4. Describe one specific way that you helped someone else this week, or reached out for help.
+--> I asked for a way to simplify this
+--> "if rand_int == 1 or rand_int == 2 or rand_int == 3:"
+--> Chris F reminded me that I could use "if rand_int in range(1,4)"
+
+5. Are there any topics from this week that you still feel uneasy about, or would like to learn more about?
+--> I feel comfortable with the content at this point.
+
+6. How much time did you spend this week on each of the following:
+
+Reading - 2 hr
+Checkpoint A - 0.5 hr
+Checkpoint B - 0.5 hr
+Team Activity - 1 hr
+Data Structures Homework - 1.5 hr
+Prove Assignment - 2 hr
