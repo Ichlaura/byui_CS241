@@ -1,0 +1,27 @@
+Your Name: Lewis Lockhart
+
+1. Describe a case where you think an error/exception could be used, but should _not_ be used.
+--> It seems that in the case of dividing by zero, an exception could be used but a better way
+--> might be to just return 0 so the program can continue to run.
+
+2. If method A calls B, and B calls C, and then an error is raised in function C, where can it potentially
+be caught (A, B, C, or all of the above)?
+--> Seems like it could be caught in any of those.
+
+3. What is the most interesting thing you learned as a part of your work for this class this week?
+--> It was good to learn about hashing.
+
+4. Describe one specific way that you helped someone else this week, or reached out for help.
+--> I asked a question about how to approach the death of the bullet based on the frames.
+
+5. Are there any topics from this week that you still feel uneasy about, or would like to learn more about?
+--> I would like to have done some assignment related to hashing. Easier to remember if we can apply the info.
+
+6. How much time did you spend this week on each of the following:
+
+Reading - 1 hr
+Checkpoint A - 0.25 hr
+Checkpoint B - 0.5 hr
+Team Activity - 2 hr
+Data Structures Homework - 1 hr
+Prove Assignment - 4 hrs

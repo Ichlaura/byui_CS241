@@ -9,17 +9,17 @@ import random
 import os.path
 from abc import abstractmethod
 
-if os.path.isfile("images/bg.jpg"):
-    print("File exists")
-else:
-    print("File not found")
+# if os.path.isfile("images/bg.jpg"):
+#     print("File exists")
+# else:
+#     print("File not found")
 
 # These are Global constants to use throughout the game
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 
 BULLET_RADIUS = 30
-BULLET_SPEED = 10
+BULLET_SPEED = 15
 BULLET_LIFE = 60
 
 SHIP_TURN_AMOUNT = 3
@@ -147,17 +147,17 @@ class Bullet(FlyingObj):
                                       self.width, self.height,
                                       self.texture, self.angle, ALPHA)
 
-    def fire(self, angle):
-        self.velocity.dx = math.cos(math.radians(angle - 270)) * BULLET_SPEED
-        self.velocity.dy = math.sin(math.radians(angle - 270)) * BULLET_SPEED
+    def fire(self, angle, ship):
+        self.velocity.dx = (math.cos(math.radians(angle - 270)) * BULLET_SPEED) + (ship.velocity.dx / 2)
+        self.velocity.dy = (math.sin(math.radians(angle - 270)) * BULLET_SPEED) + (ship.velocity.dy / 2)
         return self.velocity.dx, self.velocity.dy
 
     def align_with_ship(self, ship):
         self.center.x = ship.center.x
         self.center.y = ship.center.y
         self.angle += ship.angle
-        self.velocity.dx = ship.velocity.dx + self.fire(ship.angle)[0]
-        self.velocity.dy = ship.velocity.dy + self.fire(ship.angle)[1]
+        self.velocity.dx = (ship.velocity.dx + self.fire(ship.angle, ship)[0])
+        self.velocity.dy = (ship.velocity.dy + self.fire(ship.angle, ship)[1])
 
 
 class Asteroid(FlyingObj):
@@ -262,8 +262,9 @@ class Game(arcade.Window):
                                       SCREEN_WIDTH, SCREEN_HEIGHT,
                                       self.bg_texture, 0, 255)
 
-        for bullet in self.bullets:
-            bullet.draw()
+        for b in self.bullets:
+            if b.alive:
+                b.draw()
 
         for asteroid in self.asteroids:
             asteroid.draw()
@@ -282,8 +283,13 @@ class Game(arcade.Window):
             self.ship.advance()
             self.ship.wrap(SCREEN_WIDTH, SCREEN_HEIGHT)
 
-        for bullet in self.bullets:
-            bullet.advance()
+        for b in self.bullets:
+            if b.alive:
+                b.advance()
+                b.wrap(SCREEN_WIDTH, SCREEN_HEIGHT)
+                b.life -= 1
+                if b.life <= 0:
+                    b.alive = False
 
         for asteroid in self.asteroids:
             asteroid.advance()
