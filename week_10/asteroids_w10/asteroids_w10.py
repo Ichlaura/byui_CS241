@@ -119,7 +119,7 @@ class Alien(FlyingObj):
         super().__init__()
         self.center.x = random.randint(1, 100)
         self.center.y = random.randint(1, 150)
-        self.direction = random.randint(1, 150)
+        self.direction = random.randint(0, 360)
         self.speed = 2
         self.radius = 20
         self.velocity.dx = math.cos(math.radians(self.direction)) * self.speed
@@ -134,7 +134,7 @@ class Alien(FlyingObj):
     def advance(self):
         self.change_direction += 1
         if self.change_direction >= 40:
-            self.direction = random.randint(1, 200)
+            self.direction = random.randint(0, 360)
             self.speed = random.randint(0, 5)
             self.velocity.dx = math.cos(math.radians(self.direction)) * self.speed
             self.velocity.dy = math.sin(math.radians(self.direction)) * self.speed

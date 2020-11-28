@@ -3,18 +3,12 @@ Author: Lewis Lockhart
 Assignment: Asteroids
 """
 
-""" SPACE changed out for LSHIFT """
-
 import arcade
 import math
 import random
 import os.path
-from abc import abstractmethod, ABC
+from abc import abstractmethod
 
-# if os.path.isfile("images/bg.jpg"):
-#     print("File exists")
-# else:
-#     print("File not found")
 
 # These are Global constants to use throughout the game
 SCREEN_WIDTH = 800
@@ -23,6 +17,8 @@ SCREEN_HEIGHT = 600
 BULLET_RADIUS = 30
 BULLET_SPEED = 15
 BULLET_LIFE = 30
+ALIEN_BULLET_SPEED = 5
+ALIEN_BULLET_LIFE = 15
 
 SHIP_TURN_AMOUNT = 3
 SHIP_THRUST_AMOUNT = 0.05
@@ -119,7 +115,7 @@ class Alien(FlyingObj):
         super().__init__()
         self.center.x = random.randint(1, 100)
         self.center.y = random.randint(1, 150)
-        self.direction = random.randint(1, 150)
+        self.direction = random.randint(1, 360)
         self.speed = 2
         self.radius = 20
         self.velocity.dx = math.cos(math.radians(self.direction)) * self.speed
@@ -129,13 +125,13 @@ class Alien(FlyingObj):
         self.width = self.texture.width / 8
         self.height = self.texture.height / 8
         self.change_direction = 0
-        self.point_value = 10
+        self.point_value = 25
 
     def advance(self):
         self.change_direction += 1
         if self.change_direction >= 40:
-            self.direction = random.randint(1, 200)
-            self.speed = random.randint(0, 5)
+            self.direction = random.randint(1, 360)
+            self.speed = random.randint(0, 6)
             self.velocity.dx = math.cos(math.radians(self.direction)) * self.speed
             self.velocity.dy = math.sin(math.radians(self.direction)) * self.speed
             self.center.x += self.velocity.dx
@@ -207,12 +203,6 @@ class Bullet(FlyingObj):
         self.width = self.texture.width
         self.height = self.texture.height
 
-    def draw(self):
-        """ Draws bullet. """
-        arcade.draw_texture_rectangle(self.center.x, self.center.y,
-                                      self.width, self.height,
-                                      self.texture, self.angle, ALPHA)
-
     def fire(self, angle, ship):
         """ Controls the speed of the bullet. """
         self.velocity.dx = (math.cos(math.radians(angle - 270)) * BULLET_SPEED) + (ship.velocity.dx / 2)
@@ -220,12 +210,53 @@ class Bullet(FlyingObj):
         return self.velocity.dx, self.velocity.dy
 
     def align_with_ship(self, ship):
-        """ Orients he bullet in the direction the ship is facing. """
+        """ Orients the bullet in the direction the ship is facing. """
         self.center.x = ship.center.x
         self.center.y = ship.center.y
         self.angle += ship.angle
         self.velocity.dx = (ship.velocity.dx + self.fire(ship.angle, ship)[0])
         self.velocity.dy = (ship.velocity.dy + self.fire(ship.angle, ship)[1])
+
+    def draw(self):
+        """ Draws bullet. """
+        arcade.draw_texture_rectangle(self.center.x, self.center.y,
+                                      self.width, self.height,
+                                      self.texture, self.angle, ALPHA)
+
+
+class AlienBullet(Bullet):
+    """ Bullet class - fired in the direction the ship is pointing. """
+    def __init__(self):
+        super().__init__()
+        self.angle = 0
+        self.velocity.dx = ALIEN_BULLET_SPEED
+        self.velocity.dy = ALIEN_BULLET_SPEED
+        self.life = ALIEN_BULLET_LIFE
+        self.img = "images/alien_fireball.png"
+        self.texture = arcade.load_texture(self.img)
+        self.width = self.texture.width / 20
+        self.height = self.texture.height / 20
+
+    def fire(self, angle, ship):
+        """ Controls the speed of the bullet. """
+        self.velocity.dx = (math.cos(angle) * BULLET_SPEED)
+        self.velocity.dy = (math.sin(angle) * BULLET_SPEED)
+        return self.velocity.dx, self.velocity.dy
+
+    def fire_at_player_ship(self, ship, alien):
+        """ Directs he bullet in the direction of the players ship. """
+        self.center.x = alien.center.x
+        self.center.y = alien.center.y
+        player_x = ship.center.x
+        player_y = ship.center.y
+        x_diff = player_x - self.center.x
+        y_diff = player_y - self.center.y
+
+        # Calculation the angle in radians between the start points
+        self.angle = math.atan2(y_diff, x_diff)
+
+        self.velocity.dx = (ship.velocity.dx + self.fire(self.angle, ship)[0])
+        self.velocity.dy = (ship.velocity.dy + self.fire(self.angle, ship)[1])
 
 
 class Asteroid(FlyingObj):
@@ -273,7 +304,7 @@ class LargeRock(Asteroid):
         self.point_value = 1
 
     def split(self, asteroid_list):
-        chunks = [MediumRock(), SmallRock()]
+        chunks = [MediumRock(), MediumRock(), SmallRock()]
         for c in chunks:
             c.center.x = self.center.x
             c.center.y = self.center.y
@@ -348,6 +379,7 @@ class Game(arcade.Window):
 
         # holds fired bullets until they die
         self.bullets = list()
+        self.alien_bullet = list()
 
         # holds asteroids until destroyed
         self.asteroids = list()
@@ -385,6 +417,9 @@ class Game(arcade.Window):
         for b in self.bullets:
             if b.alive:
                 b.draw()
+        for ab in self.alien_bullet:
+            if ab.alive:
+                ab.draw()
 
         # draws asteroids if they are alive
         for a in self.asteroids:
@@ -430,6 +465,12 @@ class Game(arcade.Window):
                 al.advance()
                 al.wrap(SCREEN_WIDTH, SCREEN_HEIGHT)
 
+                if self.alien_spawn_increment == 100 and self.ship.alive:
+                    print(self.alien_spawn_increment)
+                    bullet = AlienBullet()
+                    bullet.fire_at_player_ship(self.ship, al)
+                    self.alien_bullet.append(bullet)
+
         if self.ship.alive:
             self.ship.advance()
             self.ship.wrap(SCREEN_WIDTH, SCREEN_HEIGHT)
@@ -441,6 +482,14 @@ class Game(arcade.Window):
                 b.life -= 1
                 if b.life <= 0:
                     b.alive = False
+
+        for ab in self.alien_bullet:
+            if ab.alive:
+                ab.advance()
+                ab.wrap(SCREEN_WIDTH, SCREEN_HEIGHT)
+                ab.life -= 1
+                if ab.life <= 0:
+                    ab.alive = False
 
         for a in self.asteroids:
             if a.alive:
@@ -454,32 +503,51 @@ class Game(arcade.Window):
 
     def check_collisions(self):
 
-        # ship collision
         for a in self.asteroids:
-            if self.ship.alive and a.alive:
-                if abs(self.ship.center.x - a.center.x) < (a.radius + 20) and \
-                        abs(self.ship.center.y - a.center.y) < (a.radius + 20):
-                    self.ship.alive = False
-
-        # asteroid / bullet collision
-        for b in self.bullets:
-            for a in self.asteroids:
+            # asteroid / bullet collision
+            for b in self.bullets:
                 if b.alive and a.alive:
                     if abs(b.center.x - a.center.x) < (a.radius * 3.5) and \
                             abs(b.center.y - a.center.y) < (a.radius * 3.5):
                         b.alive = False
                         a.hit(self.asteroids)
                         self.score.update_score(a.point_value)
+            # asteroid / alien bullet collision
+            for ab in self.alien_bullet:
+                if ab.alive and a.alive:
+                    if abs(ab.center.x - a.center.x) < (a.radius * 3.5) and \
+                            abs(ab.center.y - a.center.y) < (a.radius * 3.5):
+                        ab.alive = False
+                        a.hit(self.asteroids)
+            # asteroid / ship collision
+            if self.ship.alive and a.alive:
+                if abs(self.ship.center.x - a.center.x) < (a.radius + 20) and \
+                      abs(self.ship.center.y - a.center.y) < (a.radius + 20):
+                    self.ship.alive = False
 
-        # alien / bullet collision
-        for b in self.bullets:
-            for al in self.alien:
+        for al in self.alien:
+            # alien / bullet collision
+            for b in self.bullets:
                 if b.alive and al.alive:
                     if abs(b.center.x - al.center.x) < al.radius and \
                             abs(b.center.y - al.center.y) < al.radius:
                         b.alive = False
                         al.alive = False
                         self.score.update_score(al.point_value)
+            # alien / ship collision
+            if self.ship.alive and al.alive:
+                if abs(self.ship.center.x - al.center.x) < (al.radius + 20) and \
+                        abs(self.ship.center.y - al.center.y) < (al.radius + 20):
+                    self.ship.alive = False
+                    al.alive = False
+
+        # ship / alien bullet collision
+        for ab in self.alien_bullet:
+            if ab.alive and self.ship.alive:
+                if abs(ab.center.x - self.ship.center.x) < (self.ship.radius * 3.5) and \
+                        abs(ab.center.y - self.ship.center.y) < (self.ship.radius * 3.5):
+                    ab.alive = False
+                    self.ship.alive = False
 
         self.bring_out_your_dead()
 
@@ -504,6 +572,12 @@ class Game(arcade.Window):
             if not al.alive:
                 self.alien.remove(al)
                 print(f"Removed Alien: {random.choice(comments)}")
+
+        # clean up dead alien
+        for ab in self.alien_bullet:
+            if not ab.alive:
+                self.alien_bullet.remove(ab)
+                print(f"Removed Alien Bullet: {random.choice(comments)}")
 
     def check_keys(self):
         """
@@ -544,7 +618,11 @@ class Game(arcade.Window):
 
             if key == arcade.key.LSHIFT:
                 bullet = Bullet()
-                print("bullet created")
+                bullet.align_with_ship(self.ship)
+                self.bullets.append(bullet)
+
+            if key == arcade.key.SPACE:
+                bullet = Bullet()
                 bullet.align_with_ship(self.ship)
                 self.bullets.append(bullet)
 
