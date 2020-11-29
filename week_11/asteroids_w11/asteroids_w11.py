@@ -1,6 +1,38 @@
 """
 Author: Lewis Lockhart
 Assignment: Asteroids
+
+Extras Added:
+1. Game Over Screen when ship is destroyed
+2. Score Counter
+3. 'Bring out your dead" Monty Python dialog in console when
+    dead bullets, alien ship, or asteroids are removed
+4. Player Ship speed control (limits)
+5. Background image
+6. Arcade bug work around: Due to a bug with arcade, holding
+    UP + LEFT will prevent the SPACE from firing a bullet. Added
+    another key to resolve this. LSHIFT will allow the bullets
+    to fire with any arrow key combination. (Issue discovered
+    by Chris Fowler - we worked together to isolate and resolve).
+7. Alien Bullet class added
+    1. Different image
+    3. Shorter range
+    4. Directs at player location
+    5. Bullets have collisions with player ship and asteroids
+        - no points added if alien bullet breaks asteroid
+8. Added Alien ship (hostile)
+    1. Random flight pattern
+    2. Spawns within 980 frames
+    3. Only one alien can be alive at a time
+    4. Fires at player every 980 frames when count = 100
+9. New Asteroids generated if total on screen is less than 4
+10. Game sounds
+    - asteroid break
+    - bullet - player ship
+    - bullet - alien
+    - alien alarm
+    - alien destroyed
+    - player destroyed
 """
 
 import arcade
@@ -17,7 +49,7 @@ SCREEN_HEIGHT = 600
 BULLET_RADIUS = 30
 BULLET_SPEED = 15
 BULLET_LIFE = 30
-ALIEN_BULLET_SPEED = 5
+ALIEN_BULLET_SPEED = 15
 ALIEN_BULLET_LIFE = 15
 
 SHIP_TURN_AMOUNT = 3
@@ -37,12 +69,15 @@ SMALL_ROCK_SPIN = 5
 SMALL_ROCK_RADIUS = 2
 
 ALPHA = 255
+VOLUME = 0.1
 
 
 class Score:
+    """ Score class tracks, updates and displays score. """
     def __init__(self):
         self.score = 0
 
+    # add to current score
     def update_score(self, value):
         self.score += value
 
@@ -53,12 +88,16 @@ class Score:
         arcade.draw_text(score_text, start_x=start_x, start_y=start_y, font_size=16, color=arcade.color.WHITE)
 
 
-def game_over():
-    text = "GAME OVER"
-    start_x = SCREEN_HEIGHT / 2
-    start_y = SCREEN_HEIGHT / 2
-    arcade.draw_rectangle_outline(center_x=start_x + 100, center_y=start_y, width=120, height=40, color=arcade.color.WHITE, border_width=2)
-    arcade.draw_text(text, start_x=start_x + 50, start_y=start_y - 10, font_size=16, color=arcade.color.WHITE)
+class GameSound:
+    """ Sound controls for game elements. """
+    def __init__(self, sound_file, pan):
+        self.sound = arcade.Sound(sound_file)
+        self.pan = pan
+        self.volume = VOLUME
+
+    def play(self):
+        """ Play """
+        self.sound.play(pan=self.pan, volume=self.volume)
 
 
 class Point:
@@ -87,6 +126,10 @@ class FlyingObj:
         self.direction = 1
         self.velocity.dx = math.cos(math.radians(self.direction)) * self.speed
         self.velocity.dy = math.sin(math.radians(self.direction)) * self.speed
+
+    @abstractmethod
+    def __str__(self):
+        pass
 
     def advance(self):
         """ Moves the objects forward. """
@@ -126,8 +169,14 @@ class Alien(FlyingObj):
         self.height = self.texture.height / 8
         self.change_direction = 0
         self.point_value = 25
+        self.alarm = GameSound(":resources:sounds/jump3.wav", pan=-1.0)
+        self.alarm_count = 60
+
+    def __str__(self):
+        return "Alien"
 
     def advance(self):
+        """ Recalculates speed and direction every 40 frames. """
         self.change_direction += 1
         if self.change_direction >= 40:
             self.direction = random.randint(1, 360)
@@ -140,6 +189,12 @@ class Alien(FlyingObj):
         else:
             self.center.x += self.velocity.dx
             self.center.y += self.velocity.dy
+
+        # plays alien alarm sound at intervals
+        self.alarm_count -= 1
+        if self.alive and self.alarm_count <= 0:
+            self.alarm.play()
+            self.alarm_count = 60
 
     def draw(self):
         """ Draw alien. """
@@ -159,6 +214,9 @@ class Ship(FlyingObj):
         self.texture = arcade.load_texture(self.img)
         self.width = self.texture.width / 2
         self.height = self.texture.height / 2
+
+    def __str__(self):
+        return "Player Ship"
 
     def draw(self):
         """ Draw ship. """
@@ -202,11 +260,16 @@ class Bullet(FlyingObj):
         self.texture = arcade.load_texture(self.img)
         self.width = self.texture.width
         self.height = self.texture.height
+        self.fire_bullet = GameSound(":resources:sounds/laser1.ogg", pan=-1.0)
+
+    def __str__(self):
+        return "Player Bullet"
 
     def fire(self, angle, ship):
         """ Controls the speed of the bullet. """
         self.velocity.dx = (math.cos(math.radians(angle - 270)) * BULLET_SPEED) + (ship.velocity.dx / 2)
         self.velocity.dy = (math.sin(math.radians(angle - 270)) * BULLET_SPEED) + (ship.velocity.dy / 2)
+        self.fire_bullet.play()
         return self.velocity.dx, self.velocity.dy
 
     def align_with_ship(self, ship):
@@ -236,11 +299,16 @@ class AlienBullet(Bullet):
         self.texture = arcade.load_texture(self.img)
         self.width = self.texture.width / 20
         self.height = self.texture.height / 20
+        self.fire_alien_bullet = GameSound(":resources:sounds/laser3.wav", pan=-1.0)
+
+    def __str__(self):
+        return "Alien Bullet"
 
     def fire(self, angle, ship):
         """ Controls the speed of the bullet. """
         self.velocity.dx = (math.cos(angle) * BULLET_SPEED)
         self.velocity.dy = (math.sin(angle) * BULLET_SPEED)
+        self.fire_alien_bullet.play()
         return self.velocity.dx, self.velocity.dy
 
     def fire_at_player_ship(self, ship, alien):
@@ -268,6 +336,7 @@ class Asteroid(FlyingObj):
         self.texture = arcade.load_texture(self.img)
         self.width = self.texture.width
         self.height = self.texture.height
+        self.t_break = GameSound(":resources:sounds/explosion2.wav", pan=-1.0)
 
     def draw(self):
         """ Draws asteroids. """
@@ -286,7 +355,9 @@ class Asteroid(FlyingObj):
         pass
 
     def hit(self, asteroid_list):
+        """ If hit, split and play sound. """
         self.split(asteroid_list)
+        self.t_break.play()
 
 
 class LargeRock(Asteroid):
@@ -303,7 +374,11 @@ class LargeRock(Asteroid):
         self.velocity.dy = math.sin(math.radians(self.direction)) * self.speed
         self.point_value = 1
 
+    def __str__(self):
+        return "Large Asteroid"
+
     def split(self, asteroid_list):
+        """ Splits when hit. """
         chunks = [MediumRock(), MediumRock(), SmallRock()]
         for c in chunks:
             c.center.x = self.center.x
@@ -326,7 +401,11 @@ class MediumRock(Asteroid):
         self.height = self.texture.height * 1.5
         self.point_value = 2
 
+    def __str__(self):
+        return "Medium Asteroid"
+
     def split(self, asteroid_list):
+        """ Splits when hit. """
         chunks = [SmallRock(), SmallRock()]
         for c in chunks:
             c.center.x = self.center.x
@@ -349,8 +428,35 @@ class SmallRock(Asteroid):
         self.height = self.texture.height
         self.point_value = 3
 
+    def __str__(self):
+        return "Small Asteroid"
+
     def split(self, asteroid_list):
+        """ No splits. """
         self.alive = False
+
+
+def game_over(is_over):
+    """ Displays Game Over message when player is killed. """
+    if is_over:
+        text = "GAME OVER"
+        start_x = SCREEN_HEIGHT / 2
+        start_y = SCREEN_HEIGHT / 2
+        arcade.draw_rectangle_outline(center_x=start_x + 100, center_y=start_y, width=120, height=40, color=arcade.color.WHITE, border_width=2)
+        arcade.draw_text(text, start_x=start_x + 50, start_y=start_y - 10, font_size=16, color=arcade.color.WHITE)
+
+
+def bring_out_your_dead(passed_list):
+    """ Clears the dead elements out. """
+
+    # comments made by the bullets and asteroids in honor if Monty Python
+    comments = ["I'm not dead.", "I'm not dead.", "I'm not dead.", "I'm getting better.", "I don't want to go on the cart."]
+
+    for i in passed_list:
+        """ Loops through the list and removes any alive = false items. """
+        if not i.alive:
+            passed_list.remove(i)
+            print(f"Removed {i}: {random.choice(comments)}")
 
 
 class Game(arcade.Window):
@@ -373,6 +479,8 @@ class Game(arcade.Window):
 
         # creates ship
         self.ship = Ship()
+        # ship death sound
+        self.dead_player = GameSound(":resources:sounds/gameover4.wav", pan=-1.0)
 
         # holds keyboard keys
         self.held_keys = set()
@@ -386,8 +494,11 @@ class Game(arcade.Window):
 
         # holds aliens
         self.alien = list()
+        # alien spawn reset number
         self.increment = 800
         self.alien_spawn_increment = self.increment
+        # alien death sound
+        self.dead_alien = GameSound(":resources:sounds/upgrade2.wav", pan=-1.0)
 
         for i in range(3):
             asteroid = LargeRock()
@@ -435,7 +546,8 @@ class Game(arcade.Window):
         if self.ship.alive:
             self.ship.draw()
         else:
-            game_over()
+            # calls game_over - clears if Enter is pressed
+            game_over(True)
 
         # draw score
         self.score.display()
@@ -455,6 +567,7 @@ class Game(arcade.Window):
             self.alien_spawn_increment = self.increment
         # if there is no alien, and the count is below 0, make a new alien
         if self.alien_spawn_increment <= 0 and len(self.alien) == 0:
+            # create alien
             spawn = Alien()
             self.alien.append(spawn)
             self.alien_spawn_increment = self.increment
@@ -465,17 +578,19 @@ class Game(arcade.Window):
                 al.advance()
                 al.wrap(SCREEN_WIDTH, SCREEN_HEIGHT)
 
+                # causes alien to fire at the player
                 if self.alien_spawn_increment == 100 and self.ship.alive:
-                    print(self.alien_spawn_increment)
                     bullet = AlienBullet()
                     bullet.fire_at_player_ship(self.ship, al)
                     self.alien_bullet.append(bullet)
 
         if self.ship.alive:
+            # ship can move if alive
             self.ship.advance()
             self.ship.wrap(SCREEN_WIDTH, SCREEN_HEIGHT)
 
         for b in self.bullets:
+            # moves and counts down life of bullets
             if b.alive:
                 b.advance()
                 b.wrap(SCREEN_WIDTH, SCREEN_HEIGHT)
@@ -484,6 +599,7 @@ class Game(arcade.Window):
                     b.alive = False
 
         for ab in self.alien_bullet:
+            # moves and counts down life of bullets
             if ab.alive:
                 ab.advance()
                 ab.wrap(SCREEN_WIDTH, SCREEN_HEIGHT)
@@ -492,92 +608,90 @@ class Game(arcade.Window):
                     ab.alive = False
 
         for a in self.asteroids:
+            # moves asteroids if alive
             if a.alive:
                 a.advance()
                 a.wrap(SCREEN_WIDTH, SCREEN_HEIGHT)
 
-        # generates more asteroids if total number is less than 5
-        if len(self.asteroids) < 3:
+        # generates more asteroids if total number is less than 4
+        if len(self.asteroids) < 4:
             add_asteroid = LargeRock()
             self.asteroids.append(add_asteroid)
 
     def check_collisions(self):
 
         for a in self.asteroids:
+
             # asteroid / bullet collision
             for b in self.bullets:
                 if b.alive and a.alive:
-                    if abs(b.center.x - a.center.x) < (a.radius * 3.5) and \
-                            abs(b.center.y - a.center.y) < (a.radius * 3.5):
+                    ab_contact = a.radius + b.radius
+                    if abs(b.center.x - a.center.x) < ab_contact and \
+                            abs(b.center.y - a.center.y) < ab_contact:
                         b.alive = False
                         a.hit(self.asteroids)
                         self.score.update_score(a.point_value)
+
             # asteroid / alien bullet collision
             for ab in self.alien_bullet:
                 if ab.alive and a.alive:
-                    if abs(ab.center.x - a.center.x) < (a.radius * 3.5) and \
-                            abs(ab.center.y - a.center.y) < (a.radius * 3.5):
+                    aab_contact = a.radius + ab.radius
+                    if abs(ab.center.x - a.center.x) < aab_contact and \
+                            abs(ab.center.y - a.center.y) < aab_contact:
                         ab.alive = False
                         a.hit(self.asteroids)
+
             # asteroid / ship collision
             if self.ship.alive and a.alive:
-                if abs(self.ship.center.x - a.center.x) < (a.radius + 20) and \
-                      abs(self.ship.center.y - a.center.y) < (a.radius + 20):
+                as_contact = a.radius + self.ship.radius
+                if abs(self.ship.center.x - a.center.x) < as_contact and \
+                      abs(self.ship.center.y - a.center.y) < as_contact:
                     self.ship.alive = False
+                    # play sound when player dies
+                    self.dead_player.play()
 
         for al in self.alien:
+
             # alien / bullet collision
             for b in self.bullets:
                 if b.alive and al.alive:
-                    if abs(b.center.x - al.center.x) < al.radius and \
-                            abs(b.center.y - al.center.y) < al.radius:
+                    alb_contact = al.radius + b.radius
+                    if abs(b.center.x - al.center.x) < alb_contact and \
+                            abs(b.center.y - al.center.y) < alb_contact:
                         b.alive = False
                         al.alive = False
+                        self.dead_alien.play()
                         self.score.update_score(al.point_value)
+
             # alien / ship collision
             if self.ship.alive and al.alive:
-                if abs(self.ship.center.x - al.center.x) < (al.radius + 20) and \
-                        abs(self.ship.center.y - al.center.y) < (al.radius + 20):
+                als_contact = al.radius + self.ship.radius
+                if abs(self.ship.center.x - al.center.x) < als_contact and \
+                        abs(self.ship.center.y - al.center.y) < als_contact:
                     self.ship.alive = False
                     al.alive = False
+                    # play sound when player dies
+                    self.dead_player.play()
 
         # ship / alien bullet collision
         for ab in self.alien_bullet:
             if ab.alive and self.ship.alive:
-                if abs(ab.center.x - self.ship.center.x) < (self.ship.radius * 3.5) and \
-                        abs(ab.center.y - self.ship.center.y) < (self.ship.radius * 3.5):
+                aba_contact = ab.radius + self.ship.radius
+                if abs(ab.center.x - self.ship.center.x) < aba_contact and \
+                        abs(ab.center.y - self.ship.center.y) < aba_contact:
                     ab.alive = False
                     self.ship.alive = False
-
-        self.bring_out_your_dead()
-
-    def bring_out_your_dead(self):
-        # comments made by the bullets and asteroids in honor if Monty Python
-        comments = ["I'm not dead.", "I'm not dead.", "I'm not dead.", "I'm getting better.", "I don't want to go on the cart."]
+                    # play sound when player dies
+                    self.dead_player.play()
 
         # clean up dead asteroids
-        for a in self.asteroids:
-            if not a.alive:
-                self.asteroids.remove(a)
-                print(f"Removed Asteroid: {random.choice(comments)}")
-
+        bring_out_your_dead(self.asteroids)
         # clean up dead bullets
-        for b in self.bullets:
-            if not b.alive:
-                self.bullets.remove(b)
-                print(f"Removed Bullet: {random.choice(comments)}")
-
+        bring_out_your_dead(self.bullets)
         # clean up dead alien
-        for al in self.alien:
-            if not al.alive:
-                self.alien.remove(al)
-                print(f"Removed Alien: {random.choice(comments)}")
-
-        # clean up dead alien
-        for ab in self.alien_bullet:
-            if not ab.alive:
-                self.alien_bullet.remove(ab)
-                print(f"Removed Alien Bullet: {random.choice(comments)}")
+        bring_out_your_dead(self.alien)
+        # clean up dead alien bullets
+        bring_out_your_dead(self.alien_bullet)
 
     def check_keys(self):
         """
@@ -616,6 +730,7 @@ class Game(arcade.Window):
             if key == arcade.key.DOWN:
                 self.held_keys.add(arcade.key.DOWN)
 
+            # added since pressing UP + LEFT together prevents SPACE from firing bullets
             if key == arcade.key.LSHIFT:
                 bullet = Bullet()
                 bullet.align_with_ship(self.ship)
@@ -629,6 +744,9 @@ class Game(arcade.Window):
         # If ship died, pressing ENTER makes ship regenerate.
         if key == arcade.key.ENTER:
             self.held_keys.add(arcade.key.ENTER)
+            self.ship = Ship()
+            # -100 points for resetting ship
+            self.score.score -= 100
 
     def on_key_release(self, key: int, modifiers: int):
         """
