@@ -1,0 +1,33 @@
+Your Name: Lewis Lockhart
+
+1. In your own words describe polymorphism.
+--> Polymorphism is when an object can have several differing implementations - each one
+--> adapted to handle a task in a specific way.
+
+2. Briefly describe how polymorphism is used in your project.
+--> Here are a couple examples:
+----> 1. The FlyingObj class uses the @abstractmethod to essentially force the use of polymorphism of
+----> the 'def __str__' and the 'def draw' methods.
+----> 2. The Asteroid base class has a 'def split' method that has differing implementations for the
+----> small, medium, and large asteroids.
+
+3. What is the most interesting thing you learned as a part of your work for this class this week?
+--> I learned that you can use the 'def __str__' in a class to output specific information for when a
+--> class is referenced.
+
+4. Describe one specific way that you helped someone else this week, or reached out for help.
+--> I asked about the asteroids requirement of "Small asteroids should disappear" because it could have meant
+--> that they disappear on their own after so many seconds. Michael A. indicated that they should not split,
+--> but just vanish when shot.
+
+5. Are there any topics from this week that you still feel uneasy about, or would like to learn more about?
+--> I feel fine about the information that was covered this week - no questions.
+
+6. How much time did you spend this week on each of the following:
+
+Reading - 2 hr (read stuff on my own)
+Checkpoint A - 0.0 hr
+Checkpoint B - 0.0 hr
+Team Activity - 1 hr
+Data Structures Homework - 0.5 hr
+Prove Assignment - 5 hr

@@ -82,7 +82,7 @@ class Score:
         self.score += value
 
     def display(self):
-        score_text = "Score: {}".format(self.score)
+        score_text = f"Score: {self.score}"
         start_x = 20
         start_y = SCREEN_HEIGHT - 30
         arcade.draw_text(score_text, start_x=start_x, start_y=start_y, font_size=16, color=arcade.color.WHITE)

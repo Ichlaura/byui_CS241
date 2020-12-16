@@ -1,0 +1,25 @@
+Your Name: Lewis Lockhart
+
+1. In your own words, please describe object-oriented programming and explain why it is useful.
+--> OOP is the organizing of functions and data into classes (objects). It makes the code more reusable
+--> but flexible (via polymorphism). It is also a good way to modularized the program.
+
+2. Of all the different data structures we discussed, which one do you think is the "coolest" and why?
+--> I like using classes. I have not been exposed to classes too much before taking this class but they
+--> provide a lot of advantages in organizing and reusing code.
+
+3. What is the most interesting thing you learned this semester?
+--> I think it was the concept of polymorphism and inheritance when using classes.
+
+4. If this course included three more weeks, what additional topic(s) would you like to learn about?
+--> I would loved to actually skipped the shell script section and spent more time learning about
+--> the Django. All the python programmers I know seem to use it and love it. I'm still clueless.
+
+5. What was the biggest misconception you had about this material prior to this semester?
+--> I thought I'd be joyfully programming all semester - but just when I was at the height of my joy and bliss
+--> related to programming apps and games, I was stabbed in the kidney by shell script and data science. ;(
+
+6. Do you have any final questions/comments for your instructor?
+--> Good job teaching. I wish I had received more detailed feedback on my code but I am guessing you spent more
+--> time giving feedback to the students who needed it (so you're forgiven). But whatever - we both survived
+--> the class.  
